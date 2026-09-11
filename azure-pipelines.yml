@@ -14,7 +14,7 @@ variables:
 
 steps:
 
-# Create ZIP
+# Create ZIP artifact
 - task: ArchiveFiles@2
   displayName: 'Create website ZIP'
   inputs:
@@ -32,18 +32,10 @@ steps:
     ArtifactName: 'website'
     publishLocation: 'Container'
 
-# Extract ZIP
-- task: ExtractFiles@1
-  displayName: 'Extract website ZIP'
-  inputs:
-    archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/1.zip'
-    destinationFolder: '$(Build.ArtifactStagingDirectory)/website'
-    cleanDestinationFolder: true
-
-# Deploy to Azure Static Web App
+# Deploy directly from source directory
 - task: AzureStaticWebApp@0
   displayName: 'Deploy to Azure Static Web App'
   inputs:
-    app_location: '$(Build.ArtifactStagingDirectory)/website'
+    app_location: '$(Build.SourcesDirectory)'
     skip_app_build: true
     azure_static_web_apps_api_token: '$(AZURE_STATIC_WEB_APPS_API_TOKEN)'
