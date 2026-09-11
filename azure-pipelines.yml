@@ -9,9 +9,41 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+- group: 'New variable group 11-Sep'
+
 steps:
+
+# Create ZIP
 - task: ArchiveFiles@2
+  displayName: 'Create website ZIP'
   inputs:
-    rootFolderOrFile: '$(build.sourcesDirectory)'
+    rootFolderOrFile: '$(Build.SourcesDirectory)'
     includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/1.zip'
+    replaceExistingArchive: true
+
+# Publish ZIP artifact
 - task: PublishBuildArtifacts@1
+  displayName: 'Publish website artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/1.zip'
+    ArtifactName: 'website'
+    publishLocation: 'Container'
+
+# Extract ZIP
+- task: ExtractFiles@1
+  displayName: 'Extract website ZIP'
+  inputs:
+    archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/1.zip'
+    destinationFolder: '$(Build.ArtifactStagingDirectory)/website'
+    cleanDestinationFolder: true
+
+# Deploy to Azure Static Web App
+- task: AzureStaticWebApp@0
+  displayName: 'Deploy to Azure Static Web App'
+  inputs:
+    app_location: '$(Build.ArtifactStagingDirectory)/website'
+    skip_app_build: true
+    azure_static_web_apps_api_token: '$(AZURE_STATIC_WEB_APPS_API_TOKEN)'
